@@ -291,3 +291,7 @@ repeat for all of the devices with an error
 Your windows vm is all done. Congratulations!
 
 # Mac OS X
+* Coming Soon
+
+# Linux
+* Coming Soon
