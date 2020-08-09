@@ -149,3 +149,7 @@ is there an error or warning next to Nework Selection?
 If yes, refer to https://wiki.gentoo.org/wiki/Network_bridge
 If not, you most likely already have one, and you can continue
 
+# Creating Your VM
+At this point, you should be ready to create a virtual machine, but there are some important steps to follow in order to get the most out of your vm experience. I will now be splitting the guide by which operating system it pertains to.
+
+# Windows
