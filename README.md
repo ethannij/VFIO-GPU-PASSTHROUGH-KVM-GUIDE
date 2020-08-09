@@ -199,7 +199,7 @@ cgroup_device_acl = [
 
 We will be adding arguments to the xml of your vm later, so for now, you should be fine.
 
-# Windows
+# Windows 10
 Setting up a windows vm is quite simple, although making it nearly perfect requires a little bit of configuration.
 Start by creating a new virtual machine, and select the iso you would like to use, in this case, you should choose a windows iso. Otherwise, refer to one of the other sections.
 
@@ -269,3 +269,25 @@ Your disk will now appear, and you can continue installation like normal
 
 To set up your audio:
 Download realtek ac97 audio driver from this repo
+
+Navigate to settings/Update & Security/Recovery/ and restart now
+Choose Troubleshoot/Advanced Options/Startup Settings/ and press restart
+Once booted, you should see a list of startup settings
+press 7) Disable driver signature enforcement
+
+Now you can navigate to device manager
+Select Other devices/Multimedia audio controller and Update Driver
+Browse your computer, and select the driver you downloaded from my repo
+Select Vista64 and when prompted, press install
+You will now have high quality audio passed through from your windows vm
+
+To finish up:
+navigate back to device manger
+under Other devices will be a few PCI devices
+right click on them, update driver, and navigate to, and select the virtio cd
+It will automatically pick your drivers
+repeat for all of the devices with an error
+
+Your windows vm is all done. Congratulations!
+
+# Mac OS X
