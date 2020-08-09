@@ -220,7 +220,7 @@ Remove the following:
 * Video QXL: Not needed with GPU passthrough
 
 Add the following hardware with `+Add Hardware`:
-* Storage: select custom storage: `virtio-win=0.1.171.iso` (included in repo) and set device type to `CDROM device` and Bus Type: `sata`
+* Storage: select custom storage: `virtio-win=0.1.171.iso` (https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/) and set device type to `CDROM device` and Bus Type: `sata`
 * Input `Virtio Keyboard`
 * Input `Virtio Tablet`
 * PCI Host Device: All devices pertaining to the gpu you passed through
@@ -277,7 +277,7 @@ press 7) Disable driver signature enforcement
 
 Now you can navigate to device manager
 Select Other devices/Multimedia audio controller and Update Driver
-Browse your computer, and select the driver you downloaded from my repo
+Browse your computer, and select the Vist/Win7 realtek ac97 driver you downloaded (https://www.realtek.com/en/component/zoo/category/pc-audio-codecs-ac-97-audio-codecs-software)
 Select Vista64 and when prompted, press install
 You will now have high quality audio passed through from your windows vm
 
