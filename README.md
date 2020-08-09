@@ -291,7 +291,44 @@ repeat for all of the devices with an error
 Your windows vm is all done. Congratulations!
 
 # Mac OS X
-* Coming Soon
+Getting a mac os kvm up and running is not particularly difficult, but making everything work can be a bit of a challenge. For the most part, I will be summarizing: https://passthroughpo.st/new-and-improved-mac-os-tutorial-part-1-the-basics/
+If you run into any issues, please refer to their guide.
+
+First of all, If you are using an Nvidia GPU, mac os high sierra is your best bet. Nvidia drivers will not work afterwards. If you are on an amd gpu, use whatever you like.
+Make sure you have the following: `qemu python python-pip git`
+And then run this command `pip install click request`
+This will install python click request, which is recommended
+
+Navigate to the location you would like to store your virtual machine. This will be the permanant spot for its data. Though it will be added to virt-manager
+
+## Basic Installation
+`git clone https://github.com/foxlet/macOS-Simple-KVM.git`
+`cd macOS-Simple-KVM`
+Once inside, you have a choice to make:
+Nvidia: `./jumpstart.sh --high-sierra`
+Else: `./jumpstart.sh`
+
+Now we are going to create your virtual harddisk. I recommend leaving the name as `MyDisk`, this can be renamed within MacOS
+`qemu-img create -f qcow2 MyDisk.qcow2 64G` <- Put whatever size you want
+
+We need to edit the `basic.sh`
+add these two lines to the bottom, to add your disk to the vm
+```
+-drive id=SystemDisk,if=none,file=MyDisk.qcow2 \
+-device ide-hd,bus=sata.4,drive=SystemDisk \
+```
+
+If you want your Apple ID to work within the VM, you must edit the `-device e1000-82545em` line and replace the `mac=` address
+`openssl rand -hex 6 | sed 's/\(..\)/\1:/g; s/:$//'` will generate a new one, you can replace the existing one with
+
+Now you can run `./basic.sh` to start your VM
+
+Once booted, select `Disk Utility`
+Select the disk you created, and `Erase`
+Now you can exit that menu, and select `Reinstall OS X`
+Follow the instructions as usual and you should be booted into MacOSX
+
+## Fixing Resolution
 
 # Linux
 * Coming Soon
