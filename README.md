@@ -156,6 +156,9 @@ At this point, you should be ready to create a virtual machine, but there are so
 # Evdev
 I highly recommend using evdev to interact with your vm, instead of using usb passthrough. If for some reason you don't want to use evdev, skip this section.
 
+Add yourself to the `input` group with:
+`usermod -a -G input $USER`
+
 `ll /dev/input/by-id` you should see a list of usb devices
 *Example*:
 ```
@@ -209,8 +212,15 @@ In SATA Disk 1 select `advanced options` and change Disk bus: to `VirtIO`
 In NIC select `Bridge br0` if it is available, if not, choose one without a warning
 In Sound select AC97, this is important for high quality sound
 
+Remove the following:
+* Tablet: we are going to replace this
+* Display Spice: Not needed with GPU passthrough
+* Console: Not needed with GPU passthrough
+* Channel spice: Related to Display Spice, and not needed with GPU passthrough
+* Video QXL: Not needed with GPU passthrough
+
 Add the following hardware with `+Add Hardware`:
-* Storage: `virtio-win=0.1.171.iso` which is included in this repo
+* Storage: select custom storage: `virtio-win=0.1.171.iso` (included in repo) and set device type to `CDROM device` and Bus Type: `sata`
 * Input `Virtio Keyboard`
 * Input `Virtio Tablet`
 * PCI Host Device: All devices pertaining to the gpu you passed through
@@ -220,7 +230,7 @@ If you would like to edit the XML with virt-manager, be sure to enable `Enable X
 Otherwise:
 `EDITOR=<preffered editor ex. vim> virsh edit <domain name> Windows10` <- whatever you named your VM
 replace `<domain type="kvm">` with `<domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="kvm">`
-In the `<features>` subsection, add:
+In the `<features>` subsection, append:
 ```
 <hyperv>
       <relaxed state="on"/>
