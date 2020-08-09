@@ -369,6 +369,7 @@ Instead, you must edit the XML, either from virt-manger, or with virsh edit
 Remove the following:
 * Display Spice: Not needed with GPU passthrough
 * Video QXL: Not needed with GPU passthrough
+* Sound ICH9: This will allow high quality audio once we get the drivers
 
 Change `Controller USB 0` to USB 2
 Change NIC to your preffered Network Source
