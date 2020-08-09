@@ -266,3 +266,6 @@ You should see the message `We couldn't find any drives. To get storage driver, 
 Select load driver and choose `ok`
 be sure to select `Red Hat VirtIO SCSI controller (E:\amd64\w10\viostor.inf)` as your driver and click next
 Your disk will now appear, and you can continue installation like normal
+
+To set up your audio:
+Download realtek ac97 audio driver from this repo
