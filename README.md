@@ -121,6 +121,9 @@ softdep nvidia* pre: vfio-pci
 ```
 Reboot, it should work now
 
+Since you have passed your graphics card to vfio, your vm will be outputted from the passed gpu itself
+Be sure to connect it to a monitor, because that is the only way you will be able to see your vm
+
 # Installing Necessary Packages
 It's time to configure libvirt
 Install qemu, libvirt, edk2-ovmf, and virt-manager
@@ -415,4 +418,63 @@ Now reboot, you should have working, and high quality sound
 Congrats, you finished! Enjoy your hackintosh kvm
 
 # Linux
-* Coming Soon
+Setting up a linux guest in virt-manager is arguably the easiest type to set up
+
+All we need to do, is create a vm, pass through a gpu, and install your graphics driver
+
+In this guide, I will be installing manjaro, but you can subsitute manjaro with any linux distribution you wish to virtualize
+
+Open virt-manager
+Select new virtual machine
+If you are using an arch based distro, select Arch as the architecture
+If you are unsure which type to select, you can choose generic
+Be sure to select `Customize configuration before install`
+
+In Overview: Change chipset to Q35, and Firmware to `/usr/share/qemu/edk2-x86_64-code.fd`
+In Boot Options: Select SATA CDROM 1, and move it to the top of the boot order
+In NIC: Select your bridged network
+
+Remove the following:
+* Tablet: we will replace this with virtio
+* Display spice: Not needed with GPU Passthrough
+* Console: Related to spice
+* Channel qemu-ga: Not needed
+* Channel spice: Not needed with gpu passthrough
+* Video QXL: Not needed with GPU passthrough
+* USB Redirector 1: Related to Spice, Not needed
+* USB Redirector 2: Related to Spice, Not needed
+* RNG /dev/urandom: Not needed
+
+Add the following:
+* Input: VirtIO Keyboard
+* Input: VirtIO Tablet
+* PCI Host Device: Select all of your GPU's devices
+
+Now we must edit the XML:
+Replace `<domain type="kvm">` with `<domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="kvm">`
+Between `</devices>` and `</domain>` add:
+```
+<qemu:commandline>
+    <qemu:arg value="-audiodev"/>
+    <qemu:arg value="pa,id=hda,server=unix:/run/user/1000/pulse/native"/>
+    <qemu:arg value="-object"/>
+    <qemu:arg value="input-linux,id=mouse1,evdev=/dev/input/by-id/YOUR_MOUSE"/>
+    <qemu:arg value="-object"/>
+    <qemu:arg value="input-linux,id=kbd1,evdev=/dev/input/by-id/YOUR_KEYBOARD,grab_all=on,repeat=on"/>
+</qemu:commandline>
+```
+
+*NOTE*: `/run/user/1000/pulse/native` change 1000 to your user id, which can be found with the `id` command
+
+At this point, you can begin installation
+Your keyboard and mouse will be grabbed by the vm, press both ctrl keys to switch input from vm to host
+
+Install your distro how you normally would
+After it is installed, you need your graphics driver
+
+This can be done the same way you do it on your host. The package is usually distro specific.
+Once you have your graphics driver you will need virtio drivers
+Once again, this is distro specific, on Arch linux, the packages is `qemu-guest-agent`
+Reboot your linux guest, and your installation is now complete
+
+If you have any issues with your linux guest, please refer to the wiki of your distro
