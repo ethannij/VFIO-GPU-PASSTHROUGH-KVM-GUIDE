@@ -199,6 +199,8 @@ cgroup_device_acl = [
 
 We will be adding arguments to the xml of your vm later, so for now, you should be fine.
 
+Make sure to download ebtables and dnsmasq
+
 # Windows 10
 Setting up a windows vm is quite simple, although making it nearly perfect requires a little bit of configuration.
 Start by creating a new virtual machine, and select the iso you would like to use, in this case, you should choose a windows iso. Otherwise, refer to one of the other sections.
@@ -336,7 +338,13 @@ Open finder, and navigate to the EFI device you just mounted
 Navigate EFI/CLOVER/ and edit `config.plist`
 Scroll down until you see `<string>1280x720</string>`
 Change that to your screen resolution
-We also want to change the resolution in the ovfm, but we will do that later
+Now restart the virtual machine and press esc while it's booting
+if you are met with a cursor in a command line, type `exit`
+You should now be taken to the "bios" of your virtual machine
+Navigat to Device Manager
+Select OVMF Platform Congfiguration
+
+Change your preferred resolution, to the SAME one you set in your config.plist
 
 ## Switching to virt-manager
 Download the example XML from: https://github.com/PassthroughPOST/Example-OSX-Virt-Manager
@@ -344,7 +352,53 @@ Download the example XML from: https://github.com/PassthroughPOST/Example-OSX-Vi
 Place OSX.xml in the folder with the rest of your files for OSX
 Edit OSX.xml, and replace all instances of `YOURPATH` with the path to your current directory
 Now you can `virsh define OSX.xml`
-If that doesn't work, try sudo
+If that doesn't work, try using sudo
+
+Open virt-manager
+You should now see OSX as a VM
+It is important to not change your CPU topology from the virt-manager gui
+Clover will fail to start if you do
+Instead, you must edit the XML, either from virt-manger, or with virsh edit
+
+Remove the following:
+* Display Spice: Not needed with GPU passthrough
+* Video QXL: Not needed with GPU passthrough
+
+Change `Controller USB 0` to USB 2
+Change NIC to your preffered Network Source
+
+Add the following:
+* Input: Generic USB keyboard if it's not already there
+* PCI Host device: Add your graphics card's devices
+
+Now we must edit the XML:
+Change your cpu topology however you please
+Add this to the `qemu:commandline` at the bottom of the xml:
+```
+    <qemu:arg value="-audiodev"/>
+    <qemu:arg value="pa,id=hda,server=unix:/run/user/1000/pulse/native"/>
+    <qemu:arg value="-object"/>
+    <qemu:arg value="input-linux,id=mouse1,evdev=/dev/input/by-id/YOUR_MOUSE"/>
+    <qemu:arg value="-object"/>
+    <qemu:arg value="input-linux,id=kbd1,evdev=/dev/input/by-id/YOUR_KEYBOARD,grab_all=on,repeat=on"/>
+```
+
+Start your VM, your keyboard and mouse will be taken over by the vm
+press both ctrl keys to switch between host and guest input
+
+## Configuration
+We need to get a few drivers, and make a few adjustments to make our vm work well. We are going to start with the graphics driver, and then get the audio driver.
+
+For the graphics driver we are going to navigate to https://github.com/Benjamin-Dobell/nvidia-update
+
+`curl -O https://raw.githubusercontent.com/Benjamin-Dobell/nvidia-update/master/nvidia-update.sh`
+`chmod 755 nvidia-update.sh`
+Run these commands to download, and set permissions
+
+
+
+
+
 
 
 # Linux
