@@ -12,6 +12,7 @@ Before you begin, you will need the following:
 
 * Two graphics cards: If you want to take advantage of VFIO and give a gpu to your virtual machine, you will need two graphics cards. The gpu you give to your vm will be unusable to your host.
 * Linux: You will need some distro of linux, whether it is ubuntu or Arch. This guide will point towards as many resources as possible, but do not be afraid to branch off of this guide to find methods for your specific distro, though I will try my best to give general descriptions of what we are trying to accomplish, and resources you can look at.
+* Pulseaudio: I have found ways to make pulseaudio delay free, and high quality for your VM needs
 
 *IMPORTANT*: Please make a backup before following the rest of this guide, there is a chance that your system will be messed up, and it is a lot easier to restore a backup, then fix it.
 
@@ -152,4 +153,96 @@ If not, you most likely already have one, and you can continue
 # Creating Your VM
 At this point, you should be ready to create a virtual machine, but there are some important steps to follow in order to get the most out of your vm experience. I will now be splitting the guide by which operating system it pertains to.
 
+# Evdev
+I highly recommend using evdev to interact with your vm, instead of using usb passthrough. If for some reason you don't want to use evdev, skip this section.
+
+`ll /dev/input/by-id` you should see a list of usb devices
+*Example*:
+```
+❯ ll /dev/input/by-id
+total 0
+lrwxrwxrwx 1 root root 10 Aug  8 17:08 usb-Corsair_Corsair_Gaming_K95_RGB_PLATINUM_Keyboard_0E02F02BAF0798275886B4DBF5001BC5-event-if00 -> ../event23
+lrwxrwxrwx 1 root root 10 Aug  8 17:08 usb-Corsair_Corsair_Gaming_K95_RGB_PLATINUM_Keyboard_0E02F02BAF0798275886B4DBF5001BC5-event-kbd -> ../event20
+lrwxrwxrwx 1 root root 10 Aug  8 17:08 usb-Corsair_Corsair_Gaming_K95_RGB_PLATINUM_Keyboard_0E02F02BAF0798275886B4DBF5001BC5-event-mouse -> ../event24
+lrwxrwxrwx 1 root root 10 Aug  8 17:08 usb-Razer_Razer_Mamba_Wireless_000000000000-event-if01 -> ../event15
+lrwxrwxrwx 1 root root 10 Aug  8 17:08 usb-Razer_Razer_Mamba_Wireless_000000000000-event-mouse -> ../event12
+lrwxrwxrwx 1 root root 10 Aug  8 17:08 usb-Razer_Razer_Mamba_Wireless_000000000000-if01-event-kbd -> ../event14
+lrwxrwxrwx 1 root root 10 Aug  8 17:08 usb-Razer_Razer_Mamba_Wireless_000000000000-if02-event-kbd -> ../event13
+lrwxrwxrwx 1 root root 10 Aug  8 17:08 usb-SteelSeries_SteelSeries_Arctis_7-event-if05 -> ../event19
+```
+we are looking for your keyboard and mouse specifically
+if you are are not sure which device is your keyboard:
+`cat /dev/input/by-id/usb-Corsair_Corsair_Gaming_K95_RGB_PLATINUM_Keyboard_0E02F02BAF0798275886B4DBF5001BC5-event-if00` and press buttons on your keyboard, if characters of any sort appear, that is the proper device
+the same applies to your mouse
+
+If for any reason you prefer to use event# you can see which event your device is symlinked to, and use `cat /dev/input/even20` your results should be the same
+
+edit `/etc/libvirt/qemu.conf` and append the following:
+```
+...
+user = "<your_user>"
+...
+cgroup_device_acl = [
+    "/dev/kvm",
+    "/dev/input/by-id/KEYBOARD_NAME",
+    "/dev/input/by-id/MOUSE_NAME",
+    "/dev/null", "/dev/full", "/dev/zero",
+    "/dev/random", "/dev/urandom",
+    "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
+    "/dev/rtc","/dev/hpet", "/dev/sev"
+]
+...
+```
+
+We will be adding arguments to the xml of your vm later, so for now, you should be fine.
+
 # Windows
+Setting up a windows vm is quite simple, although making it nearly perfect requires a little bit of configuration.
+Start by creating a new virtual machine, and select the iso you would like to use, in this case, you should choose a windows iso. Otherwise, refer to one of the other sections.
+
+Allocate as much memory, cpu, and storage as you would like to your virtual machine
+Proceed until you reach the final step, be sure to customize before install
+In overview, select Q35 as your chipset, and `/usr/share/qemu/edk2-x86_64-code.fd` as your firmware
+In CPUs select `copy host CPU configuration` and set your topology manually. With my 8 core processor, I set `1 socket, 6 cores, 1 thread`.
+In Boot options add SATA CDROM 1 above SATA Disk 1, but enable both
+In SATA Disk 1 select `advanced options` and change Disk bus: to `VirtIO`
+In NIC select `Bridge br0` if it is available, if not, choose one without a warning
+In Sound select AC97, this is important for high quality sound
+
+Add the following hardware with `+Add Hardware`:
+* Storage: `virtio-win=0.1.171.iso` which is included in this repo
+* Input `Virtio Keyboard`
+* Input `Virtio Tablet`
+* PCI Host Device: All devices pertaining to the gpu you passed through
+
+Before we finish, we must make the following adjustments to the XML of our vm
+If you would like to edit the XML with virt-manager, be sure to enable `Enable XML Editing` under Edit/Preference/General
+Otherwise:
+`EDITOR=<preffered editor ex. vim> virsh edit <domain name> Windows10` <- whatever you named your VM
+replace `<domain type="kvm">` with `<domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="kvm">`
+In the `<features>` subsection, add:
+```
+<hyperv>
+      <relaxed state="on"/>
+      <vapic state="on"/>
+      <spinlocks state="on" retries="8191"/>
+      <vendor_id state="on" value="whatever"/>
+    </hyperv>
+    <kvm>
+      <hidden state="on"/>
+    </kvm>
+```
+This pertians to nvidia gpus, for more info about amd see: https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF
+
+Scroll to the bottom of the XML, and append the following between `</devices>` and `</domain>`:
+```
+<qemu:commandline>
+    <qemu:arg value="-object"/>
+    <qemu:arg value="input-linux,id=mouse1,evdev=/dev/input/by-id/MOUSE_NAME"/>
+    <qemu:arg value="-object"/>
+    <qemu:arg value="input-linux,id=kbd1,evdev=/dev/input/by-id/KEYBOARD_NAME,grab_all=on,repeat=on"/>
+    <qemu:arg value="-audiodev"/>
+    <qemu:arg value="pa,id=hda,server=unix:/run/user/1000/pulse/native"/>
+  </qemu:commandline>
+  ```
+It is important that you are using pulseaudio for this to work
