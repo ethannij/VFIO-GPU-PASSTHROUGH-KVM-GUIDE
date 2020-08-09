@@ -257,6 +257,9 @@ Scroll to the bottom of the XML, and append the following between `</devices>` a
     <qemu:arg value="pa,id=hda,server=unix:/run/user/1000/pulse/native"/>
   </qemu:commandline>
   ```
+  
+*NOTE*: `/run/user/1000/pulse/native` change 1000 to your user id, which can be found with the `id` command
+
 It is important that you are using pulseaudio for this to work
 
 Now you can begin installation:
@@ -382,6 +385,8 @@ Add this to the `qemu:commandline` at the bottom of the xml:
     <qemu:arg value="-object"/>
     <qemu:arg value="input-linux,id=kbd1,evdev=/dev/input/by-id/YOUR_KEYBOARD,grab_all=on,repeat=on"/>
 ```
+
+*NOTE*: `/run/user/1000/pulse/native` change 1000 to your user id, which can be found with the `id` command
 
 Start your VM, your keyboard and mouse will be taken over by the vm
 press both ctrl keys to switch between host and guest input
