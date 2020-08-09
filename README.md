@@ -256,3 +256,13 @@ Scroll to the bottom of the XML, and append the following between `</devices>` a
   </qemu:commandline>
   ```
 It is important that you are using pulseaudio for this to work
+
+Now you can begin installation:
+If you are using evdev, the vm will grab your keyboard and mouse, press both ctrl keys to switch between host and vm
+
+The gpu you passed through will now be displaying the vm
+Progress through the windows installation until you reach the disk screen
+You should see the message `We couldn't find any drives. To get storage driver, click Load driver.`
+Select load driver and choose `ok`
+be sure to select `Red Hat VirtIO SCSI controller (E:\amd64\w10\viostor.inf)` as your driver and click next
+Your disk will now appear, and you can continue installation like normal
