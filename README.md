@@ -21,6 +21,7 @@ Before we begin, you should understand the steps, and order of things, so you wi
 * Enable Virtualization: Before we can begin, we must make sure your bios allows virtualization, usually you can find this as (Intel VT-x Intel VT-d) or (AMD-Vi)
 * Enable Iommu: We need to enable IOMMU so we can seperate your many devices into groups, in order to isolate them, specifically your graphics card
 * Isolating your gpu: Using VFIO we will isolate your gpu so the host system does not take it over, we will do this by making VFIO load before the gpu driver
+* Installing neccessary packages: Including qemu, libvirt, edk2-ovmf, and virt-manager
 * Creating a bridged network for your host and guest to interact with
 
 We will not be configuring QEMU or libvirt in this part of the guide, I will make subsections for each guest OS (Windows, Mac, Linux).
@@ -90,4 +91,61 @@ At this point you should still have your IOMMU groups displayed. Find the IOMMU 
 *Example*: `[10de:1c02] [10de:10f1]`
 Be sure to take note of every device in your target IOMMU group, because you must pass all of them to the VM
 
+I recommend using modprobe to interact with VFIO
+Create the file `/etc/modprobe.d/vfio.conf`
+Now add the following to the file:
+`options vfio-pci ids=10de:1c02,10de:10f1` the order is part of it.
+Notice how I listed both devices for my gpu, seperated by a comma.
+
+###### For grub:
+edit `/etc/mkinitcpio.conf`
+Add `MODULES=(... vfio_pci vfio vfio_iommu_type1 vfio_virqfd ...)`
+and `HOOKS=(... modconf ...)`
+Now to regenerate your initramfs `mkinitcpio -p linux`, instead of typing linux, press tab to see what it corrects to. You want it to be your kernel.
+
+If you are on gentoo (like me), this can be accomplished by correctly enabling kernel modules. See: https://wiki.gentoo.org/wiki/GPU_passthrough_with_libvirt_qemu_kvm#VFIO
+
+Now reboot once again. If all went well, you should no longer see input from the graphics card you passed through.
+To verify `dmesg | grep -i vfio`, if you see your devices, perfect
+If not, also check `lspci -nnk` and find your graphics card
+Make sure `Kernel driver in use: vfio-pci`
+That means vfio has successfully captured your gpu
+
+If not, and you are on nvidia:
+edit `/etc/modprobe.d/nvidia.conf` and add the following lines
+```
+softdep nouveau pre: vfio-pci
+softdep nvidia pre: vfio-pci
+softdep nvidia* pre: vfio-pci
+```
+Reboot, it should work now
+
+# Installing Necessary Packages
+It's time to configure libvirt
+Install qemu, libvirt, edk2-ovmf, and virt-manager
+
+Enable libvirtd.service and virtlogd.socket
+###### systemd
+`systemctl enable libvirtd.service`
+`systemctl enable virtlogd.socket`
+`systemctl start libvirtd.service`
+`systemctl start virtlogd.socket`
+
+###### openrc
+`rc-update add libvirtd default`
+`rc-update add virtlogd default`
+`rc-service libvirtd start`
+`rc-service virtlogd start`
+
+# Creating a Bridged Network
+Some distros may not come with a preconfigured Bridged Network
+
+Check:
+start virt-manager
+select new virtual machine
+select an iso
+continue selecting forward until you are on Step 5 of 5
+is there an error or warning next to Nework Selection?
+If yes, refer to https://wiki.gentoo.org/wiki/Network_bridge
+If not, you most likely already have one, and you can continue
 
