@@ -329,6 +329,23 @@ Now you can exit that menu, and select `Reinstall OS X`
 Follow the instructions as usual and you should be booted into MacOSX
 
 ## Fixing Resolution
+Open the terminal, and type `sudo diskutil list`
+Find the efi partition and `sudo diskutil mount diskXsY` in my case `sudo diskutil mount disk2s1`
+
+Open finder, and navigate to the EFI device you just mounted
+Navigate EFI/CLOVER/ and edit `config.plist`
+Scroll down until you see `<string>1280x720</string>`
+Change that to your screen resolution
+We also want to change the resolution in the ovfm, but we will do that later
+
+## Switching to virt-manager
+Download the example XML from: https://github.com/PassthroughPOST/Example-OSX-Virt-Manager
+
+Place OSX.xml in the folder with the rest of your files for OSX
+Edit OSX.xml, and replace all instances of `YOURPATH` with the path to your current directory
+Now you can `virsh define OSX.xml`
+If that doesn't work, try sudo
+
 
 # Linux
 * Coming Soon
