@@ -82,3 +82,11 @@ Though that will not be covered in this guide
 Congratulations! You have successfully enabled IOMMU and your groups are valid, time to move on
 
 ## Isolating the GPU with VFIO
+In this step we will be using VFIO to isolate your gpu. When this step is complete, your video card should no longer be able to output video to your computer, so be sure you have two GPUs.
+
+With a custom kernel you must enable VFIO manually *****SHOW GENTOO WIKI*******
+
+At this point you should still have your IOMMU groups displayed. Find the IOMMU group, of the video card you want to passthrough, and take not of each devices id 
+*Example*: `[10de:1c02] [10de:10f1]`
+Be sure to take note of every device in your target IOMMU group, because you must pass all of them to the VM
+
