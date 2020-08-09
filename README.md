@@ -35,5 +35,5 @@ This section is best explained by the arch wiki: https://wiki.archlinux.org/inde
 but I will summarize it here.
 We need to add a few kernel parameters, how you do this is dependant of your bootloader.
 ###### If you are using GRUB: https://wiki.archlinux.org/index.php/Kernel_parameters#GRUB
-Edit /etc/default/grub and navigate to "GRUB_CMDDLINE_LINUX_DEFAULT=" and add "intel_iommu=on iommu=pt" (replace intel_iommu=on with amd_iommu=on if you are using an amd cpu)
-Regenerate grub with "grub-mkconfig -o /boot/grub/grub.cfg"
+Edit `/etc/default/grub` and navigate to `GRUB_CMDDLINE_LINUX_DEFAULT=` and add `intel_iommu=on iommu=pt` (replace intel_iommu=on with amd_iommu=on if you are using an amd cpu)
+Regenerate grub with `grub-mkconfig -o /boot/grub/grub.cfg`
