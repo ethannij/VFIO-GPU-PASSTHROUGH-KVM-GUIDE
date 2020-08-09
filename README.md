@@ -37,3 +37,48 @@ We need to add a few kernel parameters, how you do this is dependant of your boo
 ###### If you are using GRUB: https://wiki.archlinux.org/index.php/Kernel_parameters#GRUB
 Edit `/etc/default/grub` and navigate to `GRUB_CMDDLINE_LINUX_DEFAULT=` and add `intel_iommu=on iommu=pt` (replace intel_iommu=on with amd_iommu=on if you are using an amd cpu)
 Regenerate grub with `grub-mkconfig -o /boot/grub/grub.cfg`
+
+###### To append arguments to the kernel itself
+Navigate to `/usr/src/linux`
+`make menuconfig`
+Navigate to `processor type and features`
+Scroll down until you see `Built-in kernel command line` and enable it
+add `iommu=pt` and `intel_iommu=on` (or `amd_iommu=on`) save your .config
+exit the config
+run `make` and `make modules_install` and `make install` and copy your new kernel to your bootloader
+This is specific to the bootloader you have chosen
+In the case of efibootmgr I copy `/boot/vmlinux-5.4.48-gentoo` to `/boot/efi/boot/bootx64.efi` but this may not apply to you.
+
+For more information: https://wiki.archlinux.org/index.php/Kernel_parameters
+
+Now reboot
+
+If your computer boots without error
+Before we celebrate, let's make sure IOMMU is really enabled
+`dmesg | grep -i -e DMAR -e IOMMU`
+do you see the line `Intel-IOMMU: enabled` or something along those lines for amd?
+Hopefully, if not, make sure your cpu supports IOMMU and you correctly followed the prevoius steps
+```
+#!/bin/bash
+shopt -s nullglob
+for g in /sys/kernel/iommu_groups/*; do
+    echo "IOMMU Group ${g##*/}:"
+    for d in $g/devices/*; do
+        echo -e "\t$(lspci -nns ${d##*/})"
+    done;
+done;
+```
+will print out your IOMMU groups
+we are looking for something along the lines of
+
+```
+IOMMU Group 12:
+        03:00.0 VGA compatible controller [0300]: NVIDIA Corporation GP106 [GeForce GTX 1060 3GB] [10de:1c02] (rev a1)
+        03:00.1 Audio device [0403]: NVIDIA Corporation GP106 High Definition Audio Controller [10de:10f1] (rev a1)
+```
+The group containg your gpu (the one you want to use in your VM) should only contain the VGA controller, and audio device. If you have more than that, refer to https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Bypassing_the_IOMMU_groups_(ACS_override_patch)
+Though that will not be covered in this guide
+
+Congratulations! You have successfully enabled IOMMU and your groups are valid, time to move on
+
+## Isolating the GPU with VFIO
