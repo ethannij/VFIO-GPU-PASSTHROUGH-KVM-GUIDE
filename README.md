@@ -393,13 +393,21 @@ For the graphics driver we are going to navigate to https://github.com/Benjamin-
 
 `curl -O https://raw.githubusercontent.com/Benjamin-Dobell/nvidia-update/master/nvidia-update.sh`
 `chmod 755 nvidia-update.sh`
+
 Run these commands to download, and set permissions
+`./nvidia-update.sh` to install and patch the driver
 
+Now reboot your vm
+Upon login, you should notice a difference in performance
+You can manually set your refresh rate in your display settings now
 
+Now let's fix our audio
+navigate to https://sourceforge.net/projects/voodoohda/
 
-
-
-
+Download the driver, and save it to your desktop
+Place the file in System/Library/Extensions
+Now reboot, you should have working, and high quality sound
+Congrats, you finished! Enjoy your hackintosh kvm
 
 # Linux
 * Coming Soon
