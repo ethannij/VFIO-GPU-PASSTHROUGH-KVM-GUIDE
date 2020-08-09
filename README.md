@@ -34,4 +34,6 @@ If that applies to you, be sure to follow the vhost-net portion as well, since w
 This section is best explained by the arch wiki: https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Setting_up_IOMMU
 but I will summarize it here.
 We need to add a few kernel parameters, how you do this is dependant of your bootloader.
-###### If you are using GRUB:
+###### If you are using GRUB: https://wiki.archlinux.org/index.php/Kernel_parameters#GRUB
+Edit /etc/default/grub and navigate to "GRUB_CMDDLINE_LINUX_DEFAULT=" and add "intel_iommu=on iommu=pt" (replace intel_iommu=on with amd_iommu=on if you are using an amd cpu)
+Regenerate grub with "grub-mkconfig -o /boot/grub/grub.cfg"
