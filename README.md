@@ -296,6 +296,7 @@ right click on them, update driver, and navigate to, and select the virtio cd
 It will automatically pick your drivers
 repeat for all of the devices with an error
 
+To bypass battle eye anti cheat follow https://github.com/WCharacter/RDTSC-KVM-Handler
 Your windows vm is all done. Congratulations!
 
 # Mac OS X
