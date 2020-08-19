@@ -125,7 +125,8 @@ Since you have passed your graphics card to vfio, your vm will be outputted from
 Be sure to connect it to a monitor, because that is the only way you will be able to see your vm
 
 # Installing Necessary Packages
-It's time to configure libvirt
+It's time to configure libvirt9+
+
 Install qemu, libvirt, edk2-ovmf, and virt-manager
 
 Enable libvirtd.service and virtlogd.socket
@@ -154,7 +155,8 @@ If yes, refer to https://wiki.gentoo.org/wiki/Network_bridge
 If not, you most likely already have one, and you can continue
 
 # Creating Your VM
-At this point, you should be ready to create a virtual machine, but there are some important steps to follow in order to get the most out of your vm experience. I will now be splitting the guide by which operating system it pertains to.
+At this point, you should be ready to create a virtual machine, but there are some important steps to follow in order to get the most out of your vm experience. I will now be splitting the guide by which operating system it pertains to.9+
+
 
 # Evdev
 I highly recommend using evdev to interact with your vm, instead of using usb passthrough. If for some reason you don't want to use evdev, skip this section.
@@ -237,6 +239,12 @@ Otherwise:
 replace `<domain type="kvm">` with `<domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="kvm">`
 In the `<features>` subsection, append:
 ```
+...
+<cpu mode='host-passthrough' check='none'>
+      <topology sockets='1' dies='1' cores='6' threads='1'/>
+      <feature policy='disable' name='hypervisor'/>
+</cpu>
+...
 <hyperv>
       <relaxed state="on"/>
       <vapic state="on"/>
