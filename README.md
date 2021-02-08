@@ -255,6 +255,12 @@ In the `<features>` subsection, append:
       <hidden state="on"/>
     </kvm>
 ```
+
+Addition:
+Adding ` <feature policy="disable" name="aes"/>` is necessary for masking the VM status on AMD, though you must combine it with `<feature policy='disable' name='hypervisor'/>`.
+
+
+
 This pertians to nvidia gpus, for more info about amd see: https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF
 
 Scroll to the bottom of the XML, and append the following between `</devices>` and `</domain>`:
