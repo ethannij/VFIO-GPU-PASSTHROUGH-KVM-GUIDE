@@ -161,6 +161,15 @@ At this point, you should be ready to create a virtual machine, but there are so
 # Evdev
 I highly recommend using evdev to interact with your vm, instead of using usb passthrough. If for some reason you don't want to use evdev, skip this section.
 
+## Libvirt 7.4.0+
+You can add ```<input type='evdev'>
+    <source dev='/dev/input/event1234' grab='all' repeat='on'/>
+  </input>``` to the XML for keyboards (of course change event1234 with your kbd event) and ```<input type='evdev'>
+    <source dev='/dev/input/event1234'/>
+  </input>``` for mice
+
+## Versions before libvirt 7.4.0
+
 Add yourself to the `input` group with:
 `usermod -a -G input $USER`
 
@@ -262,6 +271,10 @@ Adding ` <feature policy="disable" name="aes"/>` is necessary for masking the VM
 
 
 This pertians to nvidia gpus, for more info about amd see: https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF
+
+*NOTE* evdev and PA passthrough through the qemu:commandline section is obsoleted with libvirt-7.4.0 onward.  
+For PA passthrough, add `<audio id='1' type='pulseaudio'/>` to the XML, or replace `<audio id='1' type='spice'/>` with it
+
 
 Scroll to the bottom of the XML, and append the following between `</devices>` and `</domain>`:
 ```
@@ -395,6 +408,8 @@ Add the following:
 
 Now we must edit the XML:
 Change your cpu topology however you please
+*NOTE* evdev and PA passthrough through the qemu:commandline section is obsoleted with libvirt-7.4.0 onward.  
+For PA passthrough, add `<audio id='1' type='pulseaudio'/>` to the XML, or replace `<audio id='1' type='spice'/>` with it
 Add this to the `qemu:commandline` at the bottom of the xml:
 ```
     <qemu:arg value="-audiodev"/>
@@ -467,6 +482,9 @@ Add the following:
 * PCI Host Device: Select all of your GPU's devices
 
 Now we must edit the XML:
+*NOTE* evdev and PA passthrough through the qemu:commandline section is obsoleted with libvirt-7.4.0 onward.  
+For PA passthrough, add `<audio id='1' type='pulseaudio'/>` to the XML, or replace `<audio id='1' type='spice'/>` with it
+
 Replace `<domain type="kvm">` with `<domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="kvm">`
 Between `</devices>` and `</domain>` add:
 ```
